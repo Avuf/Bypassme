@@ -39,11 +39,11 @@ from bypasser import *
 from pyrogram.enums import MessageEntityType, ChatMemberStatus
 from pyrogram.errors import RPCError, FloodWait, UserNotParticipant
 # bot
-bot_token = os.environ.get("TOKEN", "5523663640:AAEpsHOuL6h_EdXTkjC6QELj9FxssQhTvtA")
-api_hash = os.environ.get("HASH", "4d55a7064ad72adcfa8944f505453a8c") 
-api_id = os.environ.get("ID", "10412514")
+bot_token = os.environ.get("TOKEN", "6603231946:AAFl2XnXTzUTj-HilY8Ws09YxDTFT33oc0k")
+api_hash = os.environ.get("HASH", "4cebb9b44a78851588f0d48f2e68a386") 
+api_id = os.environ.get("ID", "25271844")
 app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
-log_channel = os.environ.get("LOG_CHANNEL", "-1001720609021")
+log_channel = os.environ.get("LOG_CHANNEL", "-1001321271473")
 
 # handle ineex
 def handleIndex(ele,message,msg):

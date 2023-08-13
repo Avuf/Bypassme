@@ -170,7 +170,7 @@ def docthread(message):
 
 def handle_force_sub(bot: pyrogram.client.Client, cmd: pyrogram.types.messages_and_media.message.Message):
     try:
-        user = bot.get_chat_member(chat_id=-1001788629657,
+        user = bot.get_chat_member(chat_id=-1001976892848,
                                          user_id=cmd.from_user.id)
         if user.status in (ChatMemberStatus.BANNED,
                            ChatMemberStatus.RESTRICTED):
@@ -188,7 +188,7 @@ def handle_force_sub(bot: pyrogram.client.Client, cmd: pyrogram.types.messages_a
                     [
                         InlineKeyboardButton(
                             "Join Now",
-                            url="https://t.me/Tellybotzz",
+                            url="https://t.me/Cyber_Robots",
                         )
                     ],
                 ]),

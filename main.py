@@ -45,6 +45,9 @@ api_id = os.environ.get("ID", "25271844")
 app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
 log_channel = os.environ.get("LOG_CHANNEL", "-1001321271473")
 
+CHANNEL_ONE =int(os.environ.get("CHANNEL_ONE", ""))
+CHANNEL_TWO =int(os.environ.get("CHANNEL_TWO", ""))
+
 # handle ineex
 def handleIndex(ele,message,msg):
     result = bypasser.scrapeIndex(ele)

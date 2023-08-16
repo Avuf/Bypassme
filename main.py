@@ -1,485 +1,253 @@
-import os , time
-import re
-from user import User as USER
-from pyrogram import Client, filters
-from info import CHANNEL, ADMINS
-from PIL import Image
-from hachoir.metadata import extractMetadata
-from hachoir.parser import createParser
-from pyrogram.enums import MessageMediaType
-from pyrogram.errors import FloodWait
-from pyrogram.errors.exceptions import ChannelInvalid, ChatAdminRequired, UsernameInvalid, UsernameNotModified
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
+import pyrogram
+from pyrogram import Client
+from pyrogram import filters, enums
+from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
+import bypasser
+import os
+import ddl
+import requests
+import threading
+from texts import HELP_TEXT
+from bypasser import ispresent, SITES_TEXT, gdtot3, GDTot_Crypt
+import requests
+from requests import get as rget
+import base64
+from urllib.parse import unquote, urlparse, parse_qs, quote
+import time
+import cloudscraper
+from bs4 import BeautifulSoup, NavigableString, Tag
+from lxml import etree
+from cloudscraper import create_scraper
+from uuid import uuid4
+import hashlib
+import json
+from dotenv import load_dotenv
+load_dotenv()
+from asyncio import sleep as asleep
+import PyBypass
+import os
+from pyrogram import Client
+from pyrogram.types import Message 
+from cloudscraper import create_scraper
+from os import path
+from http.cookiejar import MozillaCookieJar
+from lxml import etree
+from re import findall, match, search, sub
+from uuid import uuid4
 
-from utils import progress_for_pyrogram, convert, humanbytes
+from info import CHANNEL_TWO, CHANNEL_ONE, temp, is_requested_one, is_requested_two
+from bypasser import *
+from pyrogram.enums import MessageEntityType, ChatMemberStatus
+from pyrogram.errors import RPCError, FloodWait, UserNotParticipant
+# bot
+bot_token = os.environ.get("TOKEN", "6603231946:AAFl2XnXTzUTj-HilY8Ws09YxDTFT33oc0k")
+api_hash = os.environ.get("HASH", "4cebb9b44a78851588f0d48f2e68a386") 
+api_id = os.environ.get("ID", "25271844")
+app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
+log_channel = os.environ.get("LOG_CHANNEL", "-1001321271473")
 
-channel_pattern = "(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$"  # Capture the channel username
-pm_pattern = r"tg:\/\/openmessage\?user_id=(\d+)&message_id=(\d+)"  # Capture user_id and message_id
-
-
-
-@Client.on_message(filters.private & filters.user(ADMINS) & filters.regex(channel_pattern))
-async def channel_save(client, message):
-    ms = await message.reply("Please wait.....")
-    regex = re.compile("(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
-    match = regex.match(message.text)
-    chat_id = match.group(4)
-    msg_id = int(match.group(5))
-    if chat_id.isnumeric():
-        chat_id = int("-100" + chat_id)
-    try:
-        iwe = await USER.get_chat(chat_id)
-    except ChannelInvalid:
-        return await m.edit('This may be a private channel/group. Make me an admin over there to index the files.')
-    except (UsernameInvalid, UsernameNotModified):
-        return await m.edit('Invalid Link specified.')
-    except Exception as e:
-        logger.exception(e)
-        return await m.edit(f'Errors - {e}')
-    chat_ed = iwe.id
-    owe = await USER.get_messages(chat_ed, msg_id)
-    if not owe:
-        return
-    if not owe.media:
-        xd = await USER.copy_message(chat_id=CHANNEL, from_chat_id=chat_ed, message_id=msg_id)
-        if xd:
-            await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=int(xd.id))
-            await xd.delete()
-            await ms.delete()
-    file = getattr(owe, owe.media.value)
-    if owe.photo:
-        photo_file_path = f"downloads/{msg_id}.png"
-        await USER.download_media(message=file, file_name=photo_file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time()))
-        f = await USER.send_photo(chat_id=CHANNEL, photo=photo_file_path, caption=owe.caption)  # Send the sticker as a file 
-        await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-        os.remove(photo_file_path)
-        await f.delete()      
-        await ms.delete()  # Delete the "" message
-        return
-    new_filename = file.file_name
-    file_path = f"downloads/{new_filename}"
-    duration = 0
-    if owe.sticker:
-        sticker_file_path = f"downloads/{msg_id}.webp"  
-        await USER.download_media(message=file, file_name=sticker_file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time()))
-        f = await USER.send_sticker(chat_id=CHANNEL, sticker=sticker_file_path)  # Send the sticker as a file 
-        await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-        os.remove(sticker_file_path)
-        await f.delete()      
-        await ms.delete()  # Delete the "Sending the sticker" message
-        return
-
-    elif owe.document or owe.video:
-        try:
-            await ms.edit("Downloading....")
-            await USER.download_media(message=file, file_name=file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())) 
-        except Exception as e:
-            await ms.edit(str(e))
-            return
-        try:
-            os.remove(file.thumbs[0].file_id)
-        except:
-            pass
-        caption = f"**{owe.caption}**" if not None else ''
-        ph_path = await USER.download_media(file.thumbs[0].file_id)
-        img = Image.open(ph_path).convert("RGB")  # Added conversion to RGB
-        img.thumbnail((320, 320))
-        img.save(ph_path, "JPEG")
-        try:
-            metadata = extractMetadata(createParser(file_path))
-            if metadata.has("duration"):
-                duration = metadata.get('duration').seconds
-        except:
-                pass
-        await ms.edit("Uploading....")
-        try:
-            if owe.video:
-                f = await USER.send_video(
-                    CHANNEL,
-                    video=file_path,
-                    caption=caption,
-                    thumb=ph_path,
-                    duration=duration,
-                    progress=progress_for_pyrogram,
-                    progress_args=("Uᴩʟᴏᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())
-                )
-                await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                await f.delete()
-                await ms.delete()
-                os.remove(file_path)
-                if ph_path:
-                    os.remove(ph_path)
-            if owe.document:
-                f = await USER.send_document(
-                    CHANNEL,
-                    document=file_path,
-                    caption=caption,
-                    thumb=ph_path,
-                    progress=progress_for_pyrogram,
-                    progress_args=("Uᴩʟᴏᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())
-                )
-                await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                await f.delete()
-                await ms.delete()
-                os.remove(file_path)
-                if ph_path:
-                    os.remove(ph_path)
-
-        except Exception as e:
-            os.remove(file_path)
-            if ph_path:
-                os.remove(ph_path)
-            return await ms.edit(f"Error: {e}")
-    
-@Client.on_message(filters.private & filters.user(ADMINS) & filters.regex(pm_pattern))
-async def pm_save(client, message):
-    try:
-        bot_id, ms_id = re.search(r"user_id=(\d+)&message_id=(\d+)", message.text).groups()
-        # Fetch the raw message using 'app.get_messages'
-        username = await client.ask(identifier = (message.chat.id, message.from_user.id, None), text="<b>Send this Bot username without @</b>")
-        raw = await USER.get_messages(username.text, int(ms_id))
-        await username.request.delete()
-        ms = await message.reply("Please wait.....")
-        if not raw.media:
-            await client.send_message(message.from_user.id, raw.text)
-            await ms.delete()
-            return
-        file = getattr(raw, raw.media.value)
-        if raw.photo:
-            photo_file_path = f"downloads/{ms_id}.png"
-            await USER.download_media(message=file, file_name=photo_file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time()))
-            f = await USER.send_photo(chat_id=CHANNEL, photo=photo_file_path, caption=raw.caption)  # Send the sticker as a file 
-            await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-            os.remove(photo_file_path)
-            await f.delete()      
-            await ms.delete()  # Delete the "" message
-            return
-        new_filename = file.file_name
-        file_path = f"downloads/{new_filename}"
-        duration = 0
-        if raw.sticker:
-            sticker_file_path = f"downloads/{ms_id}.webp"  
-            await USER.download_media(message=file, file_name=sticker_file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time()))
-            f = await USER.send_sticker(chat_id=CHANNEL, sticker=sticker_file_path)  # Send the sticker as a file 
-            await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-            os.remove(sticker_file_path)
-            await f.delete()      
-            await ms.delete()  # Delete the "Sending the sticker" message
-            return
-
-        elif raw.document or raw.video:
-            try:
-                await ms.edit("Downloading....")
-                await USER.download_media(message=file, file_name=file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())) 
-            except Exception as e:
-                await ms.edit(str(e))
-                return
-            try:
-                metadata = extractMetadata(createParser(file_path))
-                if metadata.has("duration"):
-                    duration = metadata.get('duration').seconds
-            except:
-                pass
-            try:
-                os.remove(file.thumbs[0].file_id)
-            except:
-                pass
-            caption = f"**{raw.caption}**"
-            ph_path = await USER.download_media(file.thumbs[0].file_id)
-            img = Image.open(ph_path).convert("RGB")  # Added conversion to RGB
-            img.thumbnail((320, 320))
-            img.save(ph_path, "JPEG")
-
-            await ms.edit("Uploading....")
-            try:
-                if raw.video:
-                    f = await USER.send_video(
-                        CHANNEL,
-                        video=file_path,
-                        caption=caption,
-                        thumb=ph_path,
-                        duration=duration,
-                        progress=progress_for_pyrogram,
-                        progress_args=("Uᴩʟᴏᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())
-                    )
-                    await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                    await f.delete()
-                    await ms.delete()
-                    os.remove(file_path)
-                    if ph_path:
-                        os.remove(ph_path)
-                
-                if raw.document:
-                    f = await USER.send_document(
-                        CHANNEL,
-                        document=file_path,
-                        caption=caption,
-                        thumb=ph_path,
-                        progress=progress_for_pyrogram,
-                        progress_args=("Uᴩʟᴏᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())
-                    )
-                    await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                    await f.delete()
-                    await ms.delete()
-                    os.remove(file_path)
-                    if ph_path:
-                        os.remove(ph_path)
-            except Exception as e:
-                os.remove(file_path)
-                if ph_path:
-                    os.remove(ph_path)
-                return await ms.edit(f"Error: {e}")
-    except Exception as e:
-        await ms.edit(f"Error: {e}")
+# handle ineex
+def handleIndex(ele,message,msg):
+    result = bypasser.scrapeIndex(ele)
+    try: app.delete_messages(message.chat.id, msg.id)
+    except: pass
+    for page in result: app.send_message(message.chat.id, page, reply_to_message_id=message.id, disable_web_page_preview=True)
 
 
-@Client.on_message(filters.private & filters.user(ADMINS) & filters.command('batch'))
-async def batch(client, message):
-    method = await client.ask(identifier=(message.chat.id, message.from_user.id, None),
-                              text="<b>Send <code>True</code> if you are saving files from bot PM\n\nSend <code>False</code> if you are saving files from a channel</b>")
-    
-    if method.text.lower() == "true":
-        f_link = await client.ask(identifier=(message.chat.id, message.from_user.id, None),
-                                  text="<b>Send me the first message Link</b>")
-        l_link = await client.ask(identifier=(message.chat.id, message.from_user.id, None),
-                                  text="<b>Send me the last message Link</b>")
-        
-        f_match = re.match(pm_pattern, f_link.text)
-        l_match = re.match(pm_pattern, l_link.text)
-        
-        if f_match and l_match:
-            first_user_id = int(f_match.group(1))
-            first_message_id = int(f_match.group(2))
-            last_user_id = int(l_match.group(1))
-            last_message_id = int(l_match.group(2))
-            chat_id = message.chat.id
-            if first_user_id != last_user_id:
-                return await message.reply("Invalid link format. Please provide valid PM links.")
-            username = await client.ask(identifier = (message.chat.id, message.from_user.id, None), text="<b>Send this Bot username without @</b>")
-       
-            for i in range(first_message_id, last_message_id + 1):
-                await username.request.delete()
-                ms = await message.reply("Please wait.....")
-                raw = await USER.get_messages(username.text, i)
-                if raw.empty:
-                    continue
-                if not raw.media:
-                    owe = await USER.copy_message(chat_id=CHANNEL, from_chat_id=username.text, message_id=i)
-                    await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=int(owe.id))
-                    await ms.delete()
-                    await owe.delete()
-                    continue
-                file = getattr(raw, raw.media.value)
-                if raw.photo:
-                    photo_file_path = f"downloads/{msg_id}.png"
-                    await USER.download_media(message=file, file_name=photo_file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time()))
-                    f = await USER.send_photo(chat_id=CHANNEL, photo=photo_file_path, caption=raw.caption)  # Send the sticker as a file 
-                    await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                    os.remove(photo_file_path)
-                    await f.delete()      
-                    await ms.delete()  # Delete the "" message
-                    continue
-                new_filename = file.file_name
-                file_path = f"downloads/{new_filename}"
-                duration = 0
-               
-                if raw.sticker:
-                    sticker_file_path = f"downloads/{i}.webp"  
-                    await USER.download_media(message=file, file_name=sticker_file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time()))
-                    f = await USER.send_sticker(chat_id=CHANNEL, sticker=sticker_file_path)  # Send the sticker as a file 
-                    await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                    os.remove(sticker_file_path)
-                    await f.delete()      
-                    await ms.delete()  # Delete the "Sending the sticker" message
-                    continue     
-                elif raw.document or raw.video:
-                    try:
-                        await ms.edit("Downloading....")
-                        await USER.download_media(message=file, file_name=file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())) 
-                    except Exception as e:
-                        await ms.edit(str(e))
-                        continue
-                    try:
-                        metadata = extractMetadata(createParser(file_path))
-                        if metadata.has("duration"):
-                            duration = metadata.get('duration').seconds
-                    except:
-                       pass
-                    caption = f"{raw.caption}"
-    
-                    ph_path = None
-                    if raw.document:
-                        if raw.document.thumbs:  # Check if thumbnails are present in the document
-                            thumb = raw.document.thumbs[0]
-                            ph_path = await USER.download_media(thumb.file_id)
-                            img = Image.open(ph_path).convert("RGB")
-                            img.thumbnail((320, 320))
-                            img.save(ph_path, "JPEG")
-                    
-                    await ms.edit("Uploading....")
-                    try:
-                        if raw.video:
-                            f = await USER.send_video(
-                                CHANNEL,
-                                video=file_path,
-                                caption=caption,
-                                thumb=ph_path,
-                                duration=duration,
-                                progress=progress_for_pyrogram,
-                                progress_args=("Uᴩʟᴏᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())
-                            )
-                            await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                            await f.delete()
-                            await ms.delete()
-                            os.remove(file_path)
-                            if ph_path:
-                               os.remove(ph_path)
-                        if raw.document:
-                            f = await USER.send_document(
-                                CHANNEL,
-                                document=file_path,
-                                caption=caption,
-                                thumb=ph_path,
-                                progress=progress_for_pyrogram,
-                                progress_args=("Uᴩʟᴏᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())
-                            )
-                            await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                            await f.delete()
-                            await ms.delete()
-                            os.remove(file_path)
-                            if ph_path:
-                                os.remove(ph_path)
-                    except Exception as e:
-                        os.remove(file_path)
-                        if ph_path:
-                            os.remove(ph_path)
-                        return await ms.edit(f"Error: {e}") 
-                
+# loop thread
+def loopthread(message):
+ #   if not handle_force_sub(Client, message):
+  #         return
+
+    urls = []
+    for ele in message.text.split():
+        if "http://" in ele or "https://" in ele:
+            urls.append(ele)
+    if len(urls) == 0: return
+
+    if bypasser.ispresent(ddllist,urls[0]):
+        msg = app.send_message(message.chat.id, "⚡ __generating... Please Wait 8-10 Seconds__", reply_to_message_id=message.id)
+    else:
+        if urls[0] in "https://olamovies" or urls[0] in "https://psa.pm/":
+            msg = app.send_message(message.chat.id, "🔎 __this might take some time...__", reply_to_message_id=message.id)
         else:
-            await message.reply("Invalid link format. Please provide valid PM links.")
-        
-    elif method.text.lower() == "false":
-        c_link = await client.ask(identifier=(message.chat.id, message.from_user.id, None),
-                              text="<b>Send me the First message Link</b>")
-        l_link = await client.ask(identifier=(message.chat.id, message.from_user.id, None),
-                              text="<b>Send me the last message Link</b>")
-
-        c_match = re.match(channel_pattern, c_link.text)  # Use channel_pattern for matching channel links
-        l_match = re.match(channel_pattern, l_link.text)  # Use channel_pattern for matching last message link
-
-        if c_match and l_match:
-            r_chat_id = c_match.group(4)
-
-            f_msg_id = int(c_match.group(5))
-            l_msg_id = int(l_match.group(5))
-            if r_chat_id.isnumeric():
-                try:
-                    iwe = await USER.get_chat(int("-100" + r_chat_id))
-                except Exception as e:
-                    return await message.reply(f'Errors - {e}')
-            else:
-                try:
-                    iwe = await client.get_chat(r_chat_id)
-                except Exception as e:
-                    return await message.reply(f'Errors - {e}')
-                r_chat_id = str(iwe.id)
-
-            chat_ed = iwe.id if iwe else r_chat_id
+            msg = app.send_message(message.chat.id, "🔎 __bypassing... Please Wait 8-10 Seconds__", reply_to_message_id=message.id)
+           
             
-            for msg_id in range(f_msg_id, l_msg_id + 1):
-                
-                owe = await USER.get_messages(chat_ed, msg_id)
-                if owe.empty:
-                    continue
-                if not r_chat_id.isnumeric():
-                    await client.copy_message(chat_id=message.from_user.id, from_chat_id=r_chat_id, message_id=msg_id)
-                    continue
-                if not owe.media:
-                    await client.send_message(message.from_user.id, owe.text)
-                    continue
-                file = getattr(owe, owe.media.value)
-                if owe.photo:
-                    photo_file_path = f"downloads/{msg_id}.png"
-                    await USER.download_media(message=file, file_name=photo_file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time()))
-                    f = await USER.send_photo(chat_id=CHANNEL, photo=photo_file_path, caption=owe.caption)  # Send the sticker as a file 
-                    await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                    os.remove(photo_file_path)
-                    await f.delete()      
-                    await ms.delete()  # Delete the "" message
-                    continue
-                new_filename = file.file_name
-                file_path = f"downloads/{new_filename}"
-                duration = 0
-                ms = await message.reply("Please wait.....")
-                
-                if owe.sticker:
-                    sticker_file_path = f"downloads/{msg_id}.webp"  
-                    await USER.download_media(message=file, file_name=sticker_file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time()))
-                    f = await USER.send_sticker(chat_id=CHANNEL, sticker=sticker_file_path)  # Send the sticker as a file 
-                    await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                    os.remove(sticker_file_path)
-                    await f.delete()      
-                    await ms.delete()  # Delete the "Sending the sticker" message
-                    continue
+    link = ""
+    for ele in urls:
+        if ele.split("/")[3] == "0:":
+            handleIndex(ele,message,msg)
+            return
+        elif bypasser.ispresent(ddllist,ele):
+            try: temp = ddl.direct_link_generator(ele)
+            except Exception as e: temp = "**Error**: " + str(e)
+        else:    
+            try: temp = bypasser.shortners(ele)
+            except Exception as e: temp = "**Error**: " + str(e)
+        print("bypassed:",temp)
+        link = link + temp + "\n\n"
+        
+    try:
+        app.edit_message_text(message.chat.id, msg.id, f'**__Ads Link - {urls}__**\n\n**__Original Link - {link}__**\n**__Generated By - [Link Bypasser](https://t.me/TellyLinkBypasser_bot)\n\n⚡Powered By - @TellyBotzz__**', disable_web_page_preview=True)#,
+       # reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
+        app.send_message(log_channel, text=f"**__Ads Link - {urls}__**\n\n**__Original Link - {link}__**\n**__Generated By - [Link Bypasser](https://t.me/TellyLinkBypasser_bot)__**\n\n**__Requested By: {message.from_user.mention}__**\n**__First Name: {message.from_user.first_name}__**\n**__Username: @{message.from_user.username}__**\n**__ID: {message.from_user.id}__**\n\n**__#BypassLinks__**") 
+         
+    except:
+        try: 
+            app.edit_message_text(message.chat.id, msg.id, "__Failed to Bypass__",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Complaint⚡", url="https://t.me/Legend_Shivam_7Bot")]]), reply_to_message_id=message.id)
+        except:
+            try: app.delete_messages(message.chat.id, msg.id)
+            except: pass
+            app.send_message(message.chat.id, "__Failed to Bypass__",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Complaint⚡", url="https://t.me/Legend_Shivam_7Bot")]]), reply_to_message_id=message.id)
 
-                elif owe.document or owe.video:
-                    try:
-                        await ms.edit("Downloading....")
-                        await USER.download_media(message=file, file_name=file_path, progress=progress_for_pyrogram,progress_args=("Dᴏᴡɴʟᴏᴀᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())) 
-                    except Exception as e:
-                        await ms.edit(str(e))
-                        continue
-                caption = f"**{owe.caption}**" if not None else ''
-                try:
-                    os.remove(file.thumbs[0].file_id)
-                except:
-                    pass
-                ph_path = await USER.download_media(file.thumbs[0].file_id)
-                img = Image.open(ph_path).convert("RGB")  # Added conversion to RGB
-                img.thumbnail((320, 320))
-                img.save(ph_path, "JPEG")
-                try:
-                    metadata = extractMetadata(createParser(file_path))
-                    if metadata.has("duration"):
-                        duration = metadata.get('duration').seconds
-                except:
-                    pass
-                await ms.edit("Uploading....")
-                try:
-                    if owe.video:
-                        f = await USER.send_video(
-                            CHANNEL,
-                            video=file_path,
-                            caption=caption,
-                            thumb=ph_path,
-                            duration=duration,
-                            progress=progress_for_pyrogram,
-                            progress_args=("Uᴩʟᴏᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())
-                        )
-                        await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                        await f.delete()
-                        await ms.delete()
-                        os.remove(file_path)
-                        if ph_path:
-                            os.remove(ph_path)
-                    if owe.document:
-                        f = await USER.send_document(
-                            CHANNEL,
-                            document=file_path,
-                            caption=caption,
-                            thumb=ph_path,
-                            progress=progress_for_pyrogram,
-                            progress_args=("Uᴩʟᴏᴅ Sᴛᴀʀᴛᴇᴅ....", ms, time.time())
-                        )
-                        await client.copy_message(chat_id=message.from_user.id, from_chat_id=CHANNEL, message_id=f.id)
-                        await f.delete()
-                        await ms.delete()
-                        os.remove(file_path)
-                        if ph_path:
-                            os.remove(ph_path)
-                except Exception as e:
-                   os.remove(file_path)
-                   if ph_path:
-                       os.remove(ph_path)
-                   return await ms.edit(f"Error: {e}")
+# start command
+@app.on_message(filters.command(["start"]))
+def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if log_channel:
+        try:
+            app.send_message(log_channel, text="#NewUserLinkBypass"f'\nFirst Name: {message.from_user.first_name}\nUser ID: {message.from_user.id}\nUsername:  @{message.from_user.username}\nUser Link: {message.from_user.mention}')        
+        except Exception as error:
+            print(error)
+     
+    app.send_message(message.chat.id, f"**__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will bypass it\n\nSend /sites to see supported sites__**",
+    reply_markup=InlineKeyboardMarkup([[
+                InlineKeyboardButton("❤‍🔥Update❤‍🔥", url='https://t.me/TellyBotzz'),
+                InlineKeyboardButton("❤‍🔥Developer❤‍🔥", url='https://t.me/Legend_Shivam_7'),
+            ],
+              [  InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
+              
+        
+
+
+# help command
+@app.on_message(filters.command(["sites"]))
+def send_sites(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    app.send_message(message.chat.id, SITES_TEXT,
+    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
+
+
+
+        
+        
+# links
+@app.on_message(filters.text)
+def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if CHANNEL_ONE and not await is_requested_one(client, message):
+        btn = [[
+            InlineKeyboardButton(
+                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=temp.LINK_ONE)
+        ]]
+        try:
+            if CHANNEL_TWO  and not await is_requested_two(client, message):
+                btn.append(
+                      [
+                    InlineKeyboardButton(
+                        "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", urltemp.LINK_TWO)
+                      ]
+                )
+        except Exception as e:
+            print(e)
+        app.send_message(
+            chat_id=message.from_user.id,
+            text="**Please Join My Updates Channel to use this Bot!**",
+            reply_markup=InlineKeyboardMarkup(btn),
+            parse_mode=enums.ParseMode.MARKDOWN
+            )
+        return
+
+    if CHANNEL_TWO and not await is_requested_two(client, message):
+        btn = [[
+            InlineKeyboardButton(
+                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=temp.LINK_TWO)
+        ]]
+        try:
+            if CHANNEL_ONE and not await is_requested_one(client, message):
+                btn.append(
+                      [
+                    InlineKeyboardButton(
+                        "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2", url=temp.LINK_ONE)
+                      ]
+                )
+        except Exception as e:
+            print(e)
+        app.send_message(
+            chat_id=message.from_user.id,
+            text="**Please Join My Updates Channel to use this Bot!**",
+            reply_markup=InlineKeyboardMarkup(btn),
+            parse_mode=enums.ParseMode.MARKDOWN
+            )
+        return
     
+    bypass = threading.Thread(target=lambda:loopthread(message),daemon=True)
+    bypass.start()
+
+
+# doc thread
+def docthread(message):
+    if message.document.file_name.endswith("dlc"):
+        msg = app.send_message(message.chat.id, "🔎 __bypassing...__", reply_to_message_id=message.id)
+        print("sent DLC file")
+        sess = requests.session()
+        file = app.download_media(message)
+        dlccont = open(file,"r").read()
+        link = bypasser.getlinks(dlccont,sess)
+        app.edit_message_text(message.chat.id, msg.id, f'**__Ads Link - {urls}__**\n\n**__Original Link - {link}__**\n**__Generated By - [Link Bypasser](https://t.me/TellyLinkBypasser_bot)__**', disable_web_page_preview=True)
+        os.remove(file)
+
+
+# doc
+
+
+def handle_force_sub(bot: pyrogram.client.Client, cmd: pyrogram.types.messages_and_media.message.Message):
+    try:
+        user = bot.get_chat_member(chat_id=-1001976892848,
+                                         user_id=cmd.from_user.id)
+        if user.status in (ChatMemberStatus.BANNED,
+                           ChatMemberStatus.RESTRICTED):
+            cmd.reply_text(
+                text=
+                "Sorry, You are Banned to use me. Contact my [Shivam](https://t.me/Legend_Shivam_7).",
+                disable_web_page_preview=True,
+            )
+            return 0
+    except UserNotParticipant:
+        try:
+            cmd.reply_text(
+                text="Due to Overload Only Channel Members Can Use Me",
+                reply_markup=InlineKeyboardMarkup([
+                    [
+                        InlineKeyboardButton(
+                            "Join Now",
+                            url="https://t.me/Cyber_Robots",
+                        )
+                    ],
+                ]),
+            )
+            return 0
+        except RPCError as e:
+            print(e.MESSAGE)
+    except FloodWait as ee:
+        sleep(ee.value + 3)
+        cmd.reply_text("Try later flooded!")
+        return 0
+    except Exception:
+        cmd.reply_text(
+            text=
+            "Something went Wrong! Contact [Shivam](https://t.me/Legend_Shivam_7)",
+            disable_web_page_preview=True,
+        )
+        return 0
+    return 1
+
+@app.on_message(filters.document)
+def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    bypass = threading.Thread(target=lambda:docthread(message),daemon=True)
+    bypass.start()
+
+
+# server loop
+print("Bot Starting")
+app.run()

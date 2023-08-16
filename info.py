@@ -11,3 +11,7 @@ ADMINS = [
     int(admin) if id_pattern.search(admin) else admin
     for admin in environ.get('ADMINS', '5274370570,5164928761').split(',')
 ]
+
+class temp(object):
+    LINK_ONE = None
+    LINK_TWO = None

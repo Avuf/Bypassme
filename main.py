@@ -106,6 +106,35 @@ def loopthread(message):
 # start command
 @app.on_message(filters.command(["start"]))
 def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if log_channel:
+        try:
+            app.send_message(log_channel, text="#NewUserLinkBypass"f'\nFirst Name: {message.from_user.first_name}\nUser ID: {message.from_user.id}\nUsername:  @{message.from_user.username}\nUser Link: {message.from_user.mention}')        
+        except Exception as error:
+            print(error)
+     
+    app.send_message(message.chat.id, f"**__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will bypass it\n\nSend /sites to see supported sites__**",
+    reply_markup=InlineKeyboardMarkup([[
+                InlineKeyboardButton("❤‍🔥Update❤‍🔥", url='https://t.me/TellyBotzz'),
+                InlineKeyboardButton("❤‍🔥Developer❤‍🔥", url='https://t.me/Legend_Shivam_7'),
+            ],
+              [  InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
+              
+        
+
+
+# help command
+@app.on_message(filters.command(["sites"]))
+def send_sites(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    app.send_message(message.chat.id, SITES_TEXT,
+    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
+
+
+
+        
+        
+# links
+@app.on_message(filters.text)
+def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     if CHANNEL_ONE and not await is_requested_one(client, message):
         btn = [[
             InlineKeyboardButton(
@@ -151,39 +180,6 @@ def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_
             parse_mode=enums.ParseMode.MARKDOWN
             )
         return
-     
-    app.send_message(message.chat.id, f"**__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will bypass it\n\nSend /sites to see supported sites__**",
-    reply_markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton("❤‍🔥Update❤‍🔥", url='https://t.me/TellyBotzz'),
-                InlineKeyboardButton("❤‍🔥Developer❤‍🔥", url='https://t.me/Legend_Shivam_7'),
-            ],
-              [  InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
-              
-        
-
-
-# help command
-@app.on_message(filters.command(["sites"]))
-def send_sites(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    app.send_message(message.chat.id, SITES_TEXT,
-    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
-
-
-
-        
-        
-# links
-@app.on_message(filters.text)
-def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    if not handle_force_sub(client, message):
-            return
- #   if log_channel:
-    #    try:
-    #        app.send_message(log_channel, text="#NewUserLinkBypass"f'\nFirst Name: {message.from_user.first_name}\nUser ID: {message.from_user.id}\nUsername:  @{message.from_user.username}\nUser Link: {message.from_user.mention}')
-            
-    #    except Exception as error:
-     #       print(error)
-
     
     bypass = threading.Thread(target=lambda:loopthread(message),daemon=True)
     bypass.start()

@@ -110,7 +110,79 @@ async def verupikkals(bot, message):
                 pass
     time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
     await sts.edit(f"Broadcast Completed:\nCompleted in {time_taken} seconds.\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}")
+
+
+@app.on_message(filters.text)
+async def receive(client: pyrogram.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if CHANNEL_ONE and not await is_requested_one(client, message):
+        if temp.LINK_ONE is not None:
+            ONE = temp.LINK_ONE
+        else:
+            temp.LINK_ONE = (await app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
+            ONE = temp.LINK_ONE
+        btn = [[
+            InlineKeyboardButton(
+                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=ONE)
+        ]]
+        try:
+            if CHANNEL_TWO  and not await is_requested_two(client, message):
+                if temp.LINK_TWO is not None:
+                    TWO = temp.LINK_TWO
+                else:
+                    temp.LINK_ONE = (await app.create_chat_invite_link(chat_id=CHANNEL_TWO, creates_join_request=True)).invite_link 
+                    TWO = temp.LINK_TWO
+                btn.append(
+                    [
+                        InlineKeyboardButton(
+                            "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", url=TWO)
+                    ]
+                )
+        except Exception as e:
+            print(e)
+        await app.send_message(
+            chat_id=message.from_user.id,
+            text="**Please Join My Updates Channel to use this Bot!**",
+            reply_markup=InlineKeyboardMarkup(btn),
+            parse_mode=enums.ParseMode.MARKDOWN
+        )
+        return
+
+    if CHANNEL_TWO and not await is_requested_two(client, message):
+        if temp.LINK_TWO is not None:
+            TWO = temp.LINK_TWO
+        else:
+            temp.LINK_TWO = (await app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
+            ONE = temp.LINK_TWO
+        btn = [[
+            InlineKeyboardButton(
+                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=TWO)
+        ]]
+        try:
+            if CHANNEL_ONE  and not await is_requested_one(client, message):
+                if temp.LINK_ONE is not None:
+                    ONE = temp.LINK_ONE
+                else:
+                    temp.LINK_ONE = (await app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
+                    ONE = temp.LINK_ONE
+                btn.append(
+                    [
+                        InlineKeyboardButton(
+                            "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", url=ONE)
+                    ]
+                )
+        except Exception as e:
+            print(e)
+        await app.send_message(
+            chat_id=message.from_user.id,
+            text="**Please Join My Updates Channel to use this Bot!**",
+            reply_markup=InlineKeyboardMarkup(btn),
+            parse_mode=enums.ParseMode.MARKDOWN
+        )
+        return
     
+    bypass = threading.Thread(target=lambda:loopthread(client, message), daemon=True)
+    bypass.start()
+
 def handleIndex(ele,message,msg):
     result = bypasser.scrapeIndex(ele)
     try: app.delete_messages(message.chat.id, msg.id)
@@ -240,83 +312,6 @@ def loopthread(client, message):
 def send_sites(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     app.send_message(message.chat.id, SITES_TEXT,
     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
-
-
-
-        
-        
-# links
-@app.on_message(filters.text)
-def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    if CHANNEL_ONE and not is_requested_one(client, message):
-        if temp.LINK_ONE is not None:
-            ONE = temp.LINK_ONE
-        else:
-            temp.LINK_ONE = (app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
-            ONE = temp.LINK_ONE
-        btn = [[
-            InlineKeyboardButton(
-                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=ONE)
-        ]]
-        try:
-            if CHANNEL_TWO  and not is_requested_two(client, message):
-                if temp.LINK_TWO is not None:
-                    TWO = temp.LINK_TWO
-                else:
-                    temp.LINK_ONE = (app.create_chat_invite_link(chat_id=CHANNEL_TWO, creates_join_request=True)).invite_link 
-                    TWO = temp.LINK_TWO
-                btn.append(
-                      [
-                    InlineKeyboardButton(
-                        "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", url=TWO)
-                      ]
-                )
-        except Exception as e:
-            print(e)
-        app.send_message(
-            chat_id=message.from_user.id,
-            text="**Please Join My Updates Channel to use this Bot!**",
-            reply_markup=InlineKeyboardMarkup(btn),
-            parse_mode=enums.ParseMode.MARKDOWN
-            )
-        return
-
-    if CHANNEL_TWO and not is_requested_two(client, message):
-        if temp.LINK_TWO is not None:
-            TWO = temp.LINK_TWO
-        else:
-            temp.LINK_TWO = (app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
-            ONE = temp.LINK_TWO
-        btn = [[
-            InlineKeyboardButton(
-                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=TWO)
-        ]]
-        try:
-            if CHANNEL_ONE  and not is_requested_one(client, message):
-                if temp.LINK_ONE is not None:
-                    ONE = temp.LINK_ONE
-                else:
-                    temp.LINK_ONE = (app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
-                    ONE = temp.LINK_ONE
-                btn.append(
-                      [
-                    InlineKeyboardButton(
-                        "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", url=ONE)
-                      ]
-                )
-        except Exception as e:
-            print(e)
-        app.send_message(
-            chat_id=message.from_user.id,
-            text="**Please Join My Updates Channel to use this Bot!**",
-            reply_markup=InlineKeyboardMarkup(btn),
-            parse_mode=enums.ParseMode.MARKDOWN
-            )
-        return
-    
-    bypass = threading.Thread(target=lambda:loopthread(client, message),daemon=True)
-    bypass.start()
-
 
 # doc thread
 def docthread(message):

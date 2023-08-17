@@ -55,7 +55,7 @@ def handleIndex(ele,message,msg):
 
 
 # loop thread
-def loopthread(message):
+def loopthread(client, message):
  #   if not handle_force_sub(Client, message):
   #         return
     if CHANNEL_ONE and not is_requested_one(client, message):

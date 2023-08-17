@@ -47,12 +47,68 @@ api_id = os.environ.get("ID", "25271844")
 app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
 log_channel = os.environ.get("LOG_CHANNEL", "-1001321271473")
 
+@app.on_message(filters.command(["start"]))
+async def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    if not await db.is_user_exist(message.from_user.id):
+        await db.add_user(message.from_user.id, message.from_user.first_name)
+        if log_channel:
+            try:
+                await app.send_message(log_channel, text="#NewUserLinkBypass"f'\nFirst Name: {message.from_user.first_name}\nUser ID: {message.from_user.id}\nUsername:  @{message.from_user.username}\nUser Link: {message.from_user.mention}')        
+            except Exception as error:
+                print(error)
+    buttons = [
+            [
+                InlineKeyboardButton("❤‍🔥Update❤‍🔥", url='https://t.me/TellyBotzz'),
+                InlineKeyboardButton("❤‍🔥Developer❤‍🔥", url='https://t.me/Legend_Shivam_7')
+            ],
+            [
+                InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')
+            ]
+    ]
+    reply_markup = InlineKeyboardMarkup(buttons)
+    await message.reply(f"**__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will bypass it\n\nSend /sites to see supported sites__**", reply_markup=reply_markup)
+    
 
 @app.on_message(filters.command('stats') & filters.incoming)
 async def get_ststs(bot, message):
     rju = await message.reply('Fetching stats..')
     total_users = await db.total_users_count()
     await rju.edit(f"Total Users: <code>{total_users}</code>")
+
+@app.on_message(filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
+async def verupikkals(bot, message):
+    users = await db.get_all_users()
+    b_msg = message.reply_to_message
+    sts = await message.reply_text(
+        text='Broadcasting your messages...'
+    )
+    start_time = time.time()
+    total_users = await db.total_users_count()
+    done = 0
+    blocked = 0
+    deleted = 0
+    failed =0
+
+    success = 0
+    async for user in users:
+        pti, sh = await broadcast_messages(int(user['id']), b_msg)
+        if pti:
+            success += 1
+        elif pti == False:
+            if sh == "Blocked":
+                blocked+=1
+            elif sh == "Deleted":
+                deleted += 1
+            elif sh == "Error":
+                failed += 1
+        done += 1
+        if not done % 20:
+            try:
+                await sts.edit(f"Broadcast in progress:\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}")     
+            except:
+                pass
+    time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
+    await sts.edit(f"Broadcast Completed:\nCompleted in {time_taken} seconds.\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}")
     
 def handleIndex(ele,message,msg):
     result = bypasser.scrapeIndex(ele)
@@ -175,23 +231,7 @@ def loopthread(client, message):
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Complaint⚡", url="https://t.me/Legend_Shivam_7Bot")]]), reply_to_message_id=message.id)
 
 # start command
-@app.on_message(filters.command(["start"]))
-async def send_start(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    if not await db.is_user_exist(message.from_user.id):
-        await db.add_user(message.from_user.id, message.from_user.first_name)
-        if log_channel:
-            try:
-                await app.send_message(log_channel, text="#NewUserLinkBypass"f'\nFirst Name: {message.from_user.first_name}\nUser ID: {message.from_user.id}\nUsername:  @{message.from_user.username}\nUser Link: {message.from_user.mention}')        
-            except Exception as error:
-                print(error)
-    await app.send_message(message.chat.id, f"**__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will bypass it\n\nSend /sites to see supported sites__**",
-    reply_markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton("❤‍🔥Update❤‍🔥", url='https://t.me/TellyBotzz'),
-                InlineKeyboardButton("❤‍🔥Developer❤‍🔥", url='https://t.me/Legend_Shivam_7'),
-            ],
-              [  InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
-              
-        
+
 
 
 # help command

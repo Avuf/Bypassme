@@ -180,7 +180,7 @@ async def receive(client, message):
         )
         return
     
-    bypass = threading.Thread(target=lambda:loopthread(client, message), daemon=True)
+    bypass = threading.Thread(target=lambda:loopthread(message), daemon=True)
     bypass.start()
 
 def handleIndex(ele,message,msg):

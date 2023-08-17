@@ -46,7 +46,13 @@ api_id = os.environ.get("ID", "25271844")
 app = Client("my_bot",api_id=api_id, api_hash=api_hash,bot_token=bot_token)  
 log_channel = os.environ.get("LOG_CHANNEL", "-1001321271473")
 
-# handle ineex
+
+@app.on_message(filters.command('stats') & filters.incoming)
+async def get_ststs(bot, message):
+    rju = await message.reply('Fetching stats..')
+    total_users = await db.total_users_count()
+    await rju.edit(f"Total Users: <code>{total_users}</code>")
+    
 def handleIndex(ele,message,msg):
     result = bypasser.scrapeIndex(ele)
     try: app.delete_messages(message.chat.id, msg.id)

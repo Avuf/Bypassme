@@ -169,16 +169,26 @@ async def receive(client: pyrogram.client.Client, message: pyrogram.types.messag
         return
 
     if CHANNEL_TWO and not await is_requested_two(client, message):
+        if temp.LINK_TWO is not None:
+            TWO = temp.LINK_TWO
+        else:
+            temp.LINK_TWO = (await self.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
+            ONE = temp.LINK_TWO
         btn = [[
             InlineKeyboardButton(
                 "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=TWO)
         ]]
         try:
-            if CHANNEL_ONE and not await is_requested_one(client, message):
+            if CHANNEL_ONE  and not await is_requested_one(client, message):
+                if temp.LINK_ONE is not None:
+                    ONE = temp.LINK_ONE
+                else:
+                    temp.LINK_ONE = (await self.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
+                    ONE = temp.LINK_ONE
                 btn.append(
                       [
                     InlineKeyboardButton(
-                        "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2", url=ONE)
+                        "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", url=ONE)
                       ]
                 )
         except Exception as e:

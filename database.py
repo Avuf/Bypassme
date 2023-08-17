@@ -1,5 +1,8 @@
 import motor.motor_asyncio
-from info import DATABASE_NAME, DATABASE_URI
+
+DATABASE_URI = "mongodb+srv://LINKBYPASSER:LINKBYPASSER@cluster0.1z2z5gw.mongodb.net/?retryWrites=true&w=majority"
+DATABASE_NAME = "Cluster0"
+
 
 class Database:
     

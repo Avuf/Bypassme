@@ -134,7 +134,7 @@ def send_sites(client: pyrogram.client.Client, message: pyrogram.types.messages_
         
 # links
 @app.on_message(filters.text)
-def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+async def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     if CHANNEL_ONE and not await is_requested_one(client, message):
         if temp.LINK_ONE is not None:
             ONE = temp.LINK_ONE
@@ -160,7 +160,7 @@ def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and
                 )
         except Exception as e:
             print(e)
-        app.send_message(
+        await app.send_message(
             chat_id=message.from_user.id,
             text="**Please Join My Updates Channel to use this Bot!**",
             reply_markup=InlineKeyboardMarkup(btn),
@@ -183,7 +183,7 @@ def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and
                 )
         except Exception as e:
             print(e)
-        app.send_message(
+        await app.send_message(
             chat_id=message.from_user.id,
             text="**Please Join My Updates Channel to use this Bot!**",
             reply_markup=InlineKeyboardMarkup(btn),

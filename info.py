@@ -1,4 +1,5 @@
 import re
+import asyncio
 from os import environ
 from database import db
 from pyrogram.errors import FloodWait, PeerIdInvalid, UserIsBlocked, InputUserDeactivated
@@ -17,16 +18,16 @@ class temp(object):
     LINK_ONE = None
     LINK_TWO = None
 
-def is_requested_one(self , message):
-    user = db.get_req_one(int(message.from_user.id))
+async def is_requested_one(self , message):
+    user = await db.get_req_one(int(message.from_user.id))
     if user:
         return True
     if message.from_user.id in ADMINS:
         return True
     return False
     
-def is_requested_two(self, message):
-    user = db.get_req_two(int(message.from_user.id))
+async def is_requested_two(self, message):
+    user = await db.get_req_two(int(message.from_user.id))
     if user:
         return True
     if message.from_user.id in ADMINS:
@@ -49,7 +50,7 @@ async def broadcast_messages(user_id, message):
         return False, "Blocked"
     except PeerIdInvalid:
         await db.delete_user(int(user_id))
-        logging.info(f"{user_id} - PeerIdInvalid")
+        print(f"{user_id} - PeerIdInvalid")
         return False, "Error"
     except Exception as e:
         return False, "Error"

@@ -35,6 +35,7 @@ from lxml import etree
 from re import findall, match, search, sub
 from uuid import uuid4
 
+from database import db
 from info import CHANNEL_TWO, CHANNEL_ONE, temp, is_requested_one, is_requested_two
 from bypasser import *
 from pyrogram.enums import MessageEntityType, ChatMemberStatus

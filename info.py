@@ -3,8 +3,8 @@ from os import environ
 from database import db
 id_pattern = re.compile(r'^.\d+$')
 
-CHANNEL_ONE =int(environ.get("CHANNEL_ONE", "-1001983799712"))
-CHANNEL_TWO =int(environ.get("CHANNEL_TWO", "-1001586726744"))
+CHANNEL_ONE =int(-1001983799712)
+CHANNEL_TWO =int(-1001586726744)
 
 ADMINS = [
     int(admin) if id_pattern.search(admin) else admin

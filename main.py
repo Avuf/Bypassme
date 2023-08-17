@@ -136,16 +136,26 @@ def send_sites(client: pyrogram.client.Client, message: pyrogram.types.messages_
 @app.on_message(filters.text)
 def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     if CHANNEL_ONE and not await is_requested_one(client, message):
+        if temp.LINK_ONE is not None:
+            ONE = temp.LINK_ONE
+        else:
+            temp.LINK_ONE = (await self.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
+            ONE = temp.LINK_ONE
         btn = [[
             InlineKeyboardButton(
-                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=temp.LINK_ONE)
+                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=ONE)
         ]]
         try:
             if CHANNEL_TWO  and not await is_requested_two(client, message):
+                if temp.LINK_TWO is not None:
+                    TWO = temp.LINK_TWO
+                else:
+                    temp.LINK_ONE = (await self.create_chat_invite_link(chat_id=CHANNEL_TWO, creates_join_request=True)).invite_link 
+                    TWO = temp.LINK_TWO
                 btn.append(
                       [
                     InlineKeyboardButton(
-                        "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", urltemp.LINK_TWO)
+                        "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", url=TWO)
                       ]
                 )
         except Exception as e:
@@ -161,14 +171,14 @@ def receive(client: pyrogram.client.Client, message: pyrogram.types.messages_and
     if CHANNEL_TWO and not await is_requested_two(client, message):
         btn = [[
             InlineKeyboardButton(
-                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=temp.LINK_TWO)
+                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=TWO)
         ]]
         try:
             if CHANNEL_ONE and not await is_requested_one(client, message):
                 btn.append(
                       [
                     InlineKeyboardButton(
-                        "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2", url=temp.LINK_ONE)
+                        "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2", url=ONE)
                       ]
                 )
         except Exception as e:

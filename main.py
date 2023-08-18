@@ -163,7 +163,7 @@ async def loopthread(client, message):
             if temp.LINK_TWO is not None:
                 TWO = temp.LINK_TWO
             else:
-                temp.LINK_TWO = (await app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
+                temp.LINK_TWO = (await app.create_chat_invite_link(chat_id=CHANNEL_TWO, creates_join_request=True)).invite_link 
                 TWO = temp.LINK_TWO
             btn = [[
                 InlineKeyboardButton(
@@ -261,6 +261,20 @@ async def docfile(client: pyrogram.client.Client, message: pyrogram.types.messag
         pass
 
     await loopthread(client, message)
+
+
+@app.on_chat_join_request(
+    filters.chat(CHANNEL_ONE) | filters.chat(CHANNEL_TWO)
+)
+async def join_reqs(_, join_req: ChatJoinRequest):
+    user_id = join_req.from_user.id
+    try:
+        if join_req.chat.id == CHANNEL_ONE:
+            await db.add_req_one(user_id)
+        else:
+            await db.add_req_two(user_id)
+    except Exception as e:
+        print(f"Error adding join request: {e}")
 
 def docthread(message):
     if message.document.file_name.endswith("dlc"):

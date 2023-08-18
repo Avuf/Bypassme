@@ -114,6 +114,16 @@ async def verupikkals(bot, message):
 
 @app.on_message(filters.text)
 async def receive(client, message):
+    await loopthread(client, message)  
+    
+def handleIndex(ele,message,msg):
+    result = bypasser.scrapeIndex(ele)
+    try: app.delete_messages(message.chat.id, msg.id)
+    except: pass
+    for page in result: app.send_message(message.chat.id, page, reply_to_message_id=message.id, disable_web_page_preview=True)
+
+
+async def loopthread(client, message):
     try:
         if not await is_requested_one(client, message):
             if temp.LINK_ONE is not None:
@@ -182,16 +192,6 @@ async def receive(client, message):
             return
     except Exception as e:
             print(e)
-    await loopthread(client, message)  
-    
-def handleIndex(ele,message,msg):
-    result = bypasser.scrapeIndex(ele)
-    try: app.delete_messages(message.chat.id, msg.id)
-    except: pass
-    for page in result: app.send_message(message.chat.id, page, reply_to_message_id=message.id, disable_web_page_preview=True)
-
-
-async def loopthread(client, message):
     urls = []
     for ele in message.text.split():
         if "http://" in ele or "https://" in ele:

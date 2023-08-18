@@ -6,7 +6,7 @@ import bypasser
 import os
 import ddl
 import requests
-import threading
+from threading import Thread
 from texts import HELP_TEXT
 from bypasser import ispresent, SITES_TEXT, gdtot3, GDTot_Crypt
 import requests

@@ -9,3 +9,6 @@ lk21
 cfscrape
 PyBypass
 flask[async] 
+pymongo[srv]==4.3.3
+marshmallow==3.19.0
+motor==3.1.1

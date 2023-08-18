@@ -6,7 +6,7 @@ import bypasser
 import os
 import ddl
 import requests
-from threading import Thread
+from threading 
 from texts import HELP_TEXT
 from bypasser import ispresent, SITES_TEXT, gdtot3, GDTot_Crypt
 import requests
@@ -184,8 +184,9 @@ async def receive(client: Client, message: pyrogram.types.messages_and_media.mes
             return
     except Exception as e:
         print(e)
-    bypass = Thread(target=lambda:loopthread(message),daemon=True)
+    bypass = threading.Thread(target=lambda:loopthread(message),daemon=True)
     bypass.start()
+
 
 def handleIndex(ele,message,msg):
     result = bypasser.scrapeIndex(ele)
@@ -211,8 +212,9 @@ async def docfile(client: pyrogram.client.Client, message: pyrogram.types.messag
             return
     except:
         pass
-    bypass = Thread(target=lambda:loopthread(message),daemon=True)
+    bypass = threading.Thread(target=lambda:loopthread(message),daemon=True)
     bypass.start()
+
 
 @app.on_chat_join_request(
     filters.chat(CHANNEL_ONE) | filters.chat(CHANNEL_TWO)
@@ -241,79 +243,50 @@ async def purge_req_two(bot, message):
     await db.delete_all_two()
     await r.edit("**Req db Cleared**" )
 
-def loopthread(message,otherss=False):
-
+def loopthread(message):
     urls = []
-    if otherss: texts = message.caption
-    else: texts = message.text
-
-    if texts in [None,""]: return
-    for ele in texts.split():
+    for ele in message.text.split():
         if "http://" in ele or "https://" in ele:
             urls.append(ele)
     if len(urls) == 0: return
 
-    if bypasser.ispresent(bypasser.ddl.ddllist,urls[0]):
-        msg = app.send_message(message.chat.id, "⚡ __generating...__", reply_to_message_id=message.id)
-    elif freewall.pass_paywall(urls[0], check=True):
-        msg = app.send_message(message.chat.id, "🕴️ __jumping the wall...__", reply_to_message_id=message.id)
+    if bypasser.ispresent(ddllist,urls[0]):
+        msg = app.send_message(message.chat.id, "⚡ __generating... Please Wait 8-10 Seconds__", reply_to_message_id=message.id)
     else:
-        if "https://olamovies" in urls[0] or "https://psa.wf/" in urls[0]:
-            msg = app.send_message(message.chat.id, "⏳ __this might take some time...__", reply_to_message_id=message.id)
+        if urls[0] in "https://olamovies" or urls[0] in "https://psa.pm/":
+            msg = app.send_message(message.chat.id, "🔎 __this might take some time...__", reply_to_message_id=message.id)
         else:
-            msg = app.send_message(message.chat.id, "🔎 __bypassing...__", reply_to_message_id=message.id)
-
-    strt = time()
-    links = ""
-    temp = None
+            msg = app.send_message(message.chat.id, "🔎 __bypassing... Please Wait 8-10 Seconds__", reply_to_message_id=message.id)
+           
+            
+    link = ""
     for ele in urls:
-        if search(r"https?:\/\/(?:[\w.-]+)?\.\w+\/\d+:", ele):
+        if ele.split("/")[3] == "0:":
             handleIndex(ele,message,msg)
             return
-        elif bypasser.ispresent(bypasser.ddl.ddllist,ele):
-            try: temp = bypasser.ddl.direct_link_generator(ele)
+        elif bypasser.ispresent(ddllist,ele):
+            try: temp = ddl.direct_link_generator(ele)
             except Exception as e: temp = "**Error**: " + str(e)
-        elif freewall.pass_paywall(ele, check=True):
-            freefile = freewall.pass_paywall(ele)
-            if freefile:
-                try: 
-                    app.send_document(message.chat.id, freefile, reply_to_message_id=message.id)
-                    remove(freefile)
-                    app.delete_messages(message.chat.id,[msg.id])
-                    return
-                except: pass
-            else: app.send_message(message.chat.id, "__Failed to Jump", reply_to_message_id=message.id)
         else:    
             try: temp = bypasser.shortners(ele)
             except Exception as e: temp = "**Error**: " + str(e)
         print("bypassed:",temp)
-        if temp != None: links = links + temp + "\n"
-    end = time()
-    print("Took " + "{:.2f}".format(end-strt) + "sec")
-
-    if otherss:
-        try:
-            app.send_photo(message.chat.id, message.photo.file_id, f'__{links}__', reply_to_message_id=message.id)
-            app.delete_messages(message.chat.id,[msg.id])
-            return
-        except: pass
-
-    try: 
-        final = []
-        tmp = ""
-        for ele in links.split("\n"):
-            tmp += ele + "\n"
-            if len(tmp) > 4000:
-                final.append(tmp)
-                tmp = ""
-        final.append(tmp)
-        app.delete_messages(message.chat.id, msg.id)
-        tmsgid = message.id
-        for ele in final:
-            tmsg = app.send_message(message.chat.id, f'__{ele}__',reply_to_message_id=tmsgid, disable_web_page_preview=True)
-            tmsgid = tmsg.id
-    except Exception as e:
-        app.send_message(message.chat.id, f"__Failed to Bypass : {e}__", reply_to_message_id=message.id)
+        link = link + temp + "\n\n"
+        
+    try:
+        app.edit_message_text(message.chat.id, msg.id, f'**__Ads Link - {urls}__**\n\n**__Original Link - {link}__**\n**__Generated By - [Link Bypasser](https://t.me/TellyLinkBypasser_bot)\n\n⚡Powered By - @TellyBotzz__**', disable_web_page_preview=True)#,
+       # reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
+        app.send_message(log_channel, text=f"**__Ads Link - {urls}__**\n\n**__Original Link - {link}__**\n**__Generated By - [Link Bypasser](https://t.me/TellyLinkBypasser_bot)__**\n\n**__Requested By: {message.from_user.mention}__**\n**__First Name: {message.from_user.first_name}__**\n**__Username: @{message.from_user.username}__**\n**__ID: {message.from_user.id}__**\n\n**__#BypassLinks__**") 
+         
+    except:
+        try: 
+            app.edit_message_text(message.chat.id, msg.id, "__Failed to Bypass__",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Complaint⚡", url="https://t.me/Legend_Shivam_7Bot")]]), reply_to_message_id=message.id)
+        except:
+            try: app.delete_messages(message.chat.id, msg.id)
+            except: pass
+            app.send_message(message.chat.id, "__Failed to Bypass__",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Complaint⚡", url="https://t.me/Legend_Shivam_7Bot")]]), reply_to_message_id=message.id)
         
 def docthread(message):
     if message.document.file_name.endswith("dlc"):

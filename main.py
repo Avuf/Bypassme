@@ -113,7 +113,7 @@ async def verupikkals(bot, message):
 
 
 @app.on_message(filters.text)
-async def receive(client, message):
+async def receive(client, message: pyrogram.types.messages_and_media.message.Message):
     await loopthread(client, message)  
     
 def handleIndex(ele,message,msg):

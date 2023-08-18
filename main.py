@@ -276,6 +276,20 @@ async def join_reqs(_, join_req: ChatJoinRequest):
     except Exception as e:
         print(f"Error adding join request: {e}")
 
+
+@app.on_message(filters.command('purge_one') & filters.private & filters.user(ADMINS))
+async def purge_req_one(bot, message):
+    r = await message.reply("`processing...`")
+    await db.delete_all_one()
+    await r.edit("**Req db Cleared**" )
+
+
+@app.on_message(filters.command('purge_two') & filters.private & filters.user(ADMINS))
+async def purge_req_two(bot, message):
+    r = await message.reply("`processing...`")
+    await db.delete_all_two()
+    await r.edit("**Req db Cleared**" )
+
 def docthread(message):
     if message.document.file_name.endswith("dlc"):
         msg = app.send_message(message.chat.id, "🔎 __bypassing...__", reply_to_message_id=message.id)

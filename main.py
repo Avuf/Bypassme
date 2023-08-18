@@ -145,6 +145,13 @@ async def gesists(bot, message):
 
 @app.on_message((filters.private) & filters.text & filters.incoming)
 async def receive(client: Client, message: pyrogram.types.messages_and_media.message.Message):
+    if not await db.is_user_exist(message.from_user.id):
+        await db.add_user(message.from_user.id, message.from_user.first_name)
+        if log_channel:
+            try:
+                await app.send_message(log_channel, text="#NewUserLinkBypass"f'\nFirst Name: {message.from_user.first_name}\nUser ID: {message.from_user.id}\nUsername:  @{message.from_user.username}\nUser Link: {message.from_user.mention}')        
+            except Exception as error:
+                print(error)
     global temp  
     try:
         if not await is_requested_one(client, message):

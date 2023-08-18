@@ -66,9 +66,9 @@ class Database:
         return await self.req_two.find_one({"user_id": int(user_id)})
 
     async def delete_all_one(self):
-        await await self.req_one.delete_many({})
+        await self.req_one.delete_many({})
 
     async def delete_all_two(self):
-        await await self.req_two.delete_many({})
+        await self.req_two.delete_many({})
         
 db = Database(DATABASE_URI, DATABASE_NAME)

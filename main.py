@@ -1,7 +1,7 @@
 import pyrogram
 from pyrogram import Client
 from pyrogram import filters, enums
-from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton, ChatJoinRequest
 import bypasser
 import os
 import ddl

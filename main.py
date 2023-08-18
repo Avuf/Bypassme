@@ -112,6 +112,36 @@ async def verupikkals(bot, message):
     time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
     await sts.edit(f"Broadcast Completed:\nCompleted in {time_taken} seconds.\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}")
 
+@app.on_chat_join_request(
+    filters.chat(CHANNEL_ONE) | filters.chat(CHANNEL_TWO)
+)
+async def join_reqs(_, join_req: ChatJoinRequest):
+    user_id = join_req.from_user.id
+    try:
+        if join_req.chat.id == CHANNEL_ONE:
+            await db.add_req_one(user_id)
+        else:
+            await db.add_req_two(user_id)
+    except Exception as e:
+        print(f"Error adding join request: {e}")
+
+
+@app.on_message(filters.command("purge_one") & filters.user(ADMINS))
+async def purgeone(bot: app, message: Message):
+    r = await app.send_message(message.from_user.id, "`processing...`")
+    await db.delete_all_one()
+    await r.edit("**Req db Cleared**" )
+
+@app.on_message(filters.command("purge_two") & filters.user(ADMINS))
+async def purgetwo(bot: app, message: Message):
+    r = await app.send_message(message.from_user.id, "`processing...`")
+    await db.delete_all_two()
+    await r.edit("**Req db Cleared**" )
+
+@app.on_message(filters.command('sites') & filters.incoming)
+async def gesists(bot, message):
+    rju = await message.reply('...')
+    await rju.edit(SITES_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]))
 
 @app.on_message((filters.private) & filters.text & filters.incoming)
 async def receive(client: Client, message: pyrogram.types.messages_and_media.message.Message):
@@ -194,11 +224,6 @@ def handleIndex(ele,message,msg):
     except: pass
     for page in result: app.send_message(message.chat.id, page, reply_to_message_id=message.id, disable_web_page_preview=True)
    
-@app.on_message(filters.command('sites') & filters.incoming)
-async def gesists(bot, message):
-    rju = await message.reply('...')
-    await rju.edit(SITES_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]))
-
 @app.on_message([filters.document, filters.photo, filters.video])
 async def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     global temp  # Use the global temp dictionary
@@ -214,31 +239,7 @@ async def docfile(client: pyrogram.client.Client, message: pyrogram.types.messag
     bypass.start()
 
 
-@app.on_chat_join_request(
-    filters.chat(CHANNEL_ONE) | filters.chat(CHANNEL_TWO)
-)
-async def join_reqs(_, join_req: ChatJoinRequest):
-    user_id = join_req.from_user.id
-    try:
-        if join_req.chat.id == CHANNEL_ONE:
-            await db.add_req_one(user_id)
-        else:
-            await db.add_req_two(user_id)
-    except Exception as e:
-        print(f"Error adding join request: {e}")
 
-
-@app.on_message(filters.command("purge_one") & filters.user(ADMINS))
-async def purgeone(bot: app, message: Message):
-    r = await app.send_message(message.from_user.id, "`processing...`")
-    await db.delete_all_one()
-    await r.edit("**Req db Cleared**" )
-
-@app.on_message(filters.command("purge_two") & filters.user(ADMINS))
-async def purgetwo(bot: app, message: Message):
-    r = await app.send_message(message.from_user.id, "`processing...`")
-    await db.delete_all_two()
-    await r.edit("**Req db Cleared**" )
 
 def loopthread(message):
     urls = []

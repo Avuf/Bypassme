@@ -1,7 +1,7 @@
 import pyrogram
 from pyrogram import Client
 from pyrogram import filters, enums
-from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton, ChatJoinRequest
+from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton, ChatJoinRequest, Message
 import bypasser
 import os
 import ddl
@@ -196,7 +196,7 @@ def handleIndex(ele,message,msg):
    
 
 @app.on_message(filters.command('sites') & filters.incoming)
-async def send_sites(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+async def send_sites(client: pyrogram.client.Client, message: Message):
     await app.send_message(message.from_user.id, SITES_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
 
 
@@ -230,13 +230,13 @@ async def join_reqs(_, join_req: ChatJoinRequest):
 
 
 @app.on_message(filters.command("purge_one") & filters.user(ADMINS))
-async def purgeone(bot:pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+async def purgeone(bot: app, message: Message):
     r = await app.send_message(message.from_user.id, "`processing...`")
     await db.delete_all_one()
     await r.edit("**Req db Cleared**" )
 
 @app.on_message(filters.command("purge_two") & filters.user(ADMINS))
-async def purgetwo(bot:pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+async def purgetwo(bot: app, message: Message):
     r = await app.send_message(message.from_user.id, "`processing...`")
     await db.delete_all_two()
     await r.edit("**Req db Cleared**" )

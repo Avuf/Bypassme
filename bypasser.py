@@ -18,7 +18,7 @@ from os import environ
 with open('config.json', 'r') as f: DATA = load(f)
 def getenv(var): return environ.get(var) or DATA.get(var, None)
 
-
+SITES_TEXT = "hi"
 ##########################################################
 # ENVs
 

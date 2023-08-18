@@ -290,7 +290,7 @@ def loopthread(bot, message):
         
 def docthread(bot, message):
     if message.document.file_name.endswith("dlc"):
-        msg = bot..send_message(message.chat.id, "🔎 __bypassing...__", reply_to_message_id=message.id)
+        msg = bot.send_message(message.chat.id, "🔎 __bypassing...__", reply_to_message_id=message.id)
         print("sent DLC file")
         sess = requests.session()
         file = bot.download_media(message)

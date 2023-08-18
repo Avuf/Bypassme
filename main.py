@@ -228,14 +228,14 @@ async def join_reqs(_, join_req: ChatJoinRequest):
     except Exception as e:
         print(f"Error adding join request: {e}")
 
-@app.on_message(filters.command("purge_one") & filters.user(ADMINS)
-async def purgeone(bot:pyrogram.client.Client, message:pyrogram.types.messages_and_media.message.Message):
+@app.on_message(filters.command("purge_one") & filters.user(ADMINS))
+async def purgeone(bot:pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     r = await app.send_message(message.from_user.id, "`processing...`")
     await db.delete_all_one()
     await r.edit("**Req db Cleared**" )
 
-@app.on_message(filters.command("purge_one") & filters.user(ADMINS)
-async def purgetwo(bot:pyrogram.client.Client, message:pyrogram.types.messages_and_media.message.Message):
+@app.on_message(filters.command("purge_one") & filters.user(ADMINS))
+async def purgetwo(bot:pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
     r = await app.send_message(message.from_user.id, "`processing...`")
     await db.delete_all_two()
     await r.edit("**Req db Cleared**" )

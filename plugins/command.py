@@ -1,39 +1,21 @@
 import pyrogram
-from pyrogram import Client
-from pyrogram import filters, enums
-from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton, ChatJoinRequest, Message
-import bypasser
-import os
-import ddl
-import requests
-import threading 
+from pyrogram import Client,filters
+from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
+from os import environ, remove
+from threading import Thread
+from json import load
+from re import search
+
 from texts import HELP_TEXT
-from bypasser import ispresent, SITES_TEXT, gdtot3, GDTot_Crypt
-import requests
-from requests import get as rget
-import base64
-from urllib.parse import unquote, urlparse, parse_qs, quote
-import time
-import cloudscraper
-from bs4 import BeautifulSoup, NavigableString, Tag
-from lxml import etree
-from cloudscraper import create_scraper
-from uuid import uuid4
-import hashlib
-import json
-from dotenv import load_dotenv
-load_dotenv()
-from asyncio import sleep as asleep
-import PyBypass
-import os
-from pyrogram import Client
-from pyrogram.types import Message 
-from cloudscraper import create_scraper
-from os import path
-from http.cookiejar import MozillaCookieJar
-from lxml import etree
-from re import findall, match, search, sub
-from uuid import uuid4
+import bypasser
+import freewall
+from time import time
+
+
+# bot
+with open('config.json', 'r') as f: DATA = load(f)
+def getenv(var): return environ.get(var) or DATA.get(var, None)
+
 import time
 import datetime
 from database import db
@@ -240,53 +222,80 @@ async def docfile(bot, message):
     bypass = threading.Thread(target=lambda:loopthread(bot, message),daemon=True)
     bypass.start()
 
+def loopthread(bot, message,otherss=False):
 
-
-
-def loopthread(bot, message):
     urls = []
-    for ele in message.text.split():
+    if otherss: texts = message.caption
+    else: texts = message.text
+
+    if texts in [None,""]: return
+    for ele in texts.split():
         if "http://" in ele or "https://" in ele:
             urls.append(ele)
     if len(urls) == 0: return
 
-    if bypasser.ispresent(ddllist,urls[0]):
-        msg = bot.send_message(message.chat.id, "⚡ __generating... Please Wait 8-10 Seconds__", reply_to_message_id=message.id)
+    if bypasser.ispresent(bypasser.ddl.ddllist,urls[0]):
+        msg = bot.send_message(message.chat.id, "⚡ __generating...__", reply_to_message_id=message.id)
+    elif freewall.pass_paywall(urls[0], check=True):
+        msg = bot.send_message(message.chat.id, "🕴️ __jumping the wall...__", reply_to_message_id=message.id)
     else:
-        if urls[0] in "https://olamovies" or urls[0] in "https://psa.pm/":
-            msg = bot.send_message(message.chat.id, "🔎 __this might take some time...__", reply_to_message_id=message.id)
+        if "https://olamovies" in urls[0] or "https://psa.wf/" in urls[0]:
+            msg = bot.send_message(message.chat.id, "⏳ __this might take some time...__", reply_to_message_id=message.id)
         else:
-            msg = bot.send_message(message.chat.id, "🔎 __bypassing... Please Wait 8-10 Seconds__", reply_to_message_id=message.id)
-           
-            
-    link = ""
+            msg = bot.send_message(message.chat.id, "🔎 __bypassing...__", reply_to_message_id=message.id)
+
+    strt = time()
+    links = ""
+    temp = None
     for ele in urls:
-        if ele.split("/")[3] == "0:":
+        if search(r"https?:\/\/(?:[\w.-]+)?\.\w+\/\d+:", ele):
             handleIndex(ele,message,msg)
             return
-        elif bypasser.ispresent(ddllist,ele):
-            try: temp = ddl.direct_link_generator(ele)
+        elif bypasser.ispresent(bypasser.ddl.ddllist,ele):
+            try: temp = bypasser.ddl.direct_link_generator(ele)
             except Exception as e: temp = "**Error**: " + str(e)
+        elif freewall.pass_paywall(ele, check=True):
+            freefile = freewall.pass_paywall(ele)
+            if freefile:
+                try: 
+                    bot.send_document(message.chat.id, freefile, reply_to_message_id=message.id)
+                    remove(freefile)
+                    bot.delete_messages(message.chat.id,[msg.id])
+                    return
+                except: pass
+            else: bot.send_message(message.chat.id, "__Failed to Jump", reply_to_message_id=message.id)
         else:    
             try: temp = bypasser.shortners(ele)
             except Exception as e: temp = "**Error**: " + str(e)
         print("bypassed:",temp)
-        link = link + temp + "\n\n"
+        if temp != None: links = links + temp + "\n"
+    end = time()
+    print("Took " + "{:.2f}".format(end-strt) + "sec")
+
+    if otherss:
+        try:
+            bot.send_photo(message.chat.id, message.photo.file_id, f'__{links}__', reply_to_message_id=message.id)
+            bot.delete_messages(message.chat.id,[msg.id])
+            return
+        except: pass
+
+    try: 
+        final = []
+        tmp = ""
+        for ele in links.split("\n"):
+            tmp += ele + "\n"
+            if len(tmp) > 4000:
+                final.append(tmp)
+                tmp = ""
+        final.append(tmp)
+        bot.delete_messages(message.chat.id, msg.id)
+        tmsgid = message.id
+        for ele in final:
+            tmsg = bot.send_message(message.chat.id, f'__{ele}__',reply_to_message_id=tmsgid, disable_web_page_preview=True)
+            tmsgid = tmsg.id
+    except Exception as e:
+        bot.send_message(message.chat.id, f"__Failed to Bypass : {e}__", reply_to_message_id=message.id)
         
-    try:
-        bot.edit_message_text(message.chat.id, msg.id, f'**__Ads Link - {urls}__**\n\n**__Original Link - {link}__**\n**__Generated By - [Link Bypasser](https://t.me/TellyLinkBypasser_bot)\n\n⚡Powered By - @TellyBotzz__**', disable_web_page_preview=True)#,
-       # reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
-        bot.send_message(log_channel, text=f"**__Ads Link - {urls}__**\n\n**__Original Link - {link}__**\n**__Generated By - [Link Bypasser](https://t.me/TellyLinkBypasser_bot)__**\n\n**__Requested By: {message.from_user.mention}__**\n**__First Name: {message.from_user.first_name}__**\n**__Username: @{message.from_user.username}__**\n**__ID: {message.from_user.id}__**\n\n**__#BypassLinks__**") 
-         
-    except:
-        try: 
-            bot.edit_message_text(message.chat.id, msg.id, "__Failed to Bypass__",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Complaint⚡", url="https://t.me/Legend_Shivam_7Bot")]]), reply_to_message_id=message.id)
-        except:
-            try: bot.delete_messages(message.chat.id, msg.id)
-            except: pass
-            bot.send_message(message.chat.id, "__Failed to Bypass__",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Complaint⚡", url="https://t.me/Legend_Shivam_7Bot")]]), reply_to_message_id=message.id)
         
 def docthread(bot, message):
     if message.document.file_name.endswith("dlc"):

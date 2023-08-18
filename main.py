@@ -113,7 +113,7 @@ async def verupikkals(bot, message):
     await sts.edit(f"Broadcast Completed:\nCompleted in {time_taken} seconds.\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nSuccess: {success}\nBlocked: {blocked}\nDeleted: {deleted}")
 
 
-@app.on_message(filters.text)
+@app.on_message((filters.private) & filters.text & filters.incoming)
 async def receive(client: Client, message: pyrogram.types.messages_and_media.message.Message):
     global temp  
     try:

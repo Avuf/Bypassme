@@ -114,72 +114,74 @@ async def verupikkals(bot, message):
 
 @app.on_message(filters.text)
 async def receive(client, message):
-    if CHANNEL_ONE and not await is_requested_one(client, message):
-        if temp.LINK_ONE is not None:
-            ONE = temp.LINK_ONE
-        else:
-            temp.LINK_ONE = (await app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
-            ONE = temp.LINK_ONE
-        btn = [[
-            InlineKeyboardButton(
-                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=ONE)
-        ]]
-        try:
-            if CHANNEL_TWO  and not await is_requested_two(client, message):
-                if temp.LINK_TWO is not None:
-                    TWO = temp.LINK_TWO
-                else:
-                    temp.LINK_ONE = (await app.create_chat_invite_link(chat_id=CHANNEL_TWO, creates_join_request=True)).invite_link 
-                    TWO = temp.LINK_TWO
-                btn.append(
-                    [
-                        InlineKeyboardButton(
-                            "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", url=TWO)
-                    ]
-                )
-        except Exception as e:
-            print(e)
-        await app.send_message(
-            chat_id=message.from_user.id,
-            text="**Please Join My Updates Channel to use this Bot!**",
-            reply_markup=InlineKeyboardMarkup(btn),
-            parse_mode=enums.ParseMode.MARKDOWN
-        )
-        return
+    try:
+        if not await is_requested_one(client, message):
+            if temp.LINK_ONE is not None:
+                ONE = temp.LINK_ONE
+            else:
+                temp.LINK_ONE = (await app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
+                ONE = temp.LINK_ONE
+            btn = [[
+                InlineKeyboardButton(
+                    "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=ONE)
+            ]]
+            try:
+                if not await is_requested_two(client, message):
+                    if temp.LINK_TWO is not None:
+                        TWO = temp.LINK_TWO
+                    else:
+                        temp.LINK_ONE = (await app.create_chat_invite_link(chat_id=CHANNEL_TWO, creates_join_request=True)).invite_link 
+                        TWO = temp.LINK_TWO
+                    btn.append(
+                        [
+                            InlineKeyboardButton(
+                                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", url=TWO)
+                        ]
+                    )
+            except Exception as e:
+                print(e)
+            await app.send_message(
+                chat_id=message.from_user.id,
+                text="**Please Join My Updates Channel to use this Bot!**",
+                reply_markup=InlineKeyboardMarkup(btn),
+                parse_mode=enums.ParseMode.MARKDOWN
+            )
+            return
 
-    if CHANNEL_TWO and not await is_requested_two(client, message):
-        if temp.LINK_TWO is not None:
-            TWO = temp.LINK_TWO
-        else:
-            temp.LINK_TWO = (await app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
-            TWO = temp.LINK_TWO
-        btn = [[
-            InlineKeyboardButton(
-                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=TWO)
-        ]]
-        try:
-            if CHANNEL_ONE  and not await is_requested_one(client, message):
-                if temp.LINK_ONE is not None:
-                    ONE = temp.LINK_ONE
-                else:
-                    temp.LINK_ONE = (await app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
-                    ONE = temp.LINK_ONE
-                btn.append(
-                    [
-                        InlineKeyboardButton(
-                            "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", url=ONE)
-                    ]
-                )
-        except Exception as e:
+        if not await is_requested_two(client, message):
+            if temp.LINK_TWO is not None:
+                TWO = temp.LINK_TWO
+            else:
+                temp.LINK_TWO = (await app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
+                TWO = temp.LINK_TWO
+            btn = [[
+                InlineKeyboardButton(
+                    "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 1 🎗", url=TWO)
+            ]]
+            try:
+                if not await is_requested_one(client, message):
+                    if temp.LINK_ONE is not None:
+                        ONE = temp.LINK_ONE
+                    else:
+                        temp.LINK_ONE = (await app.create_chat_invite_link(chat_id=CHANNEL_ONE, creates_join_request=True)).invite_link 
+                        ONE = temp.LINK_ONE
+                    btn.append(
+                        [
+                            InlineKeyboardButton(
+                                "🎗 Rᴇǫᴜᴇꜱᴛ Tᴏ Jᴏɪɴ Cʜᴀɴɴᴇʟ 2 🎗", url=ONE)
+                        ]
+                    )
+            except Exception as e:
+                print(e)
+            await app.send_message(
+                chat_id=message.from_user.id,
+                text="**Please Join My Updates Channel to use this Bot!**",
+                reply_markup=InlineKeyboardMarkup(btn),
+                parse_mode=enums.ParseMode.MARKDOWN
+            )
+            return
+    except Exception as e:
             print(e)
-        await app.send_message(
-            chat_id=message.from_user.id,
-            text="**Please Join My Updates Channel to use this Bot!**",
-            reply_markup=InlineKeyboardMarkup(btn),
-            parse_mode=enums.ParseMode.MARKDOWN
-        )
-        return
-    
     await loopthread(client, message)  
     
 def handleIndex(ele,message,msg):

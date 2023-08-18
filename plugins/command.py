@@ -198,7 +198,7 @@ async def receive(client: Client, message: pyrogram.types.messages_and_media.mes
             return
     except Exception as e:
         print(e)
-    bypass = Thread(target=lambda:loopthread(message),daemon=True)
+    bypass = Thread(target=lambda:loopthread(client, message),daemon=True)
     bypass.start()
 
 
@@ -220,7 +220,7 @@ async def docfile(bot, message):
             return
     except:
         pass
-    bypass = Thread(target=lambda:loopthread(message),daemon=True)
+    bypass = Thread(target=lambda:loopthread(bot, message),daemon=True)
     bypass.start()
 
 

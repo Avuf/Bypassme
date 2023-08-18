@@ -196,9 +196,8 @@ def handleIndex(ele,message,msg):
    
 
 @app.on_message(filters.command(["sites"]))
-def send_sites(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
-    app.send_message(message.chat.id, SITES_TEXT,
-    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
+async def send_sites(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
+    await app.send_message(message.from_user.id, SITES_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
 
 
 @app.on_message([filters.document, filters.photo, filters.video])
@@ -232,14 +231,14 @@ async def join_reqs(_, join_req: ChatJoinRequest):
 
 @app.on_message(filters.command('purge_one') & filters.private & filters.user(ADMINS))
 async def purge_req_one(bot:pyrogram.client.Client, message:pyrogram.types.messages_and_media.message.Message):
-    r = await message.reply("`processing...`")
+    r = await app.send_message(message.from_user.id, "`processing...`")
     await db.delete_all_one()
     await r.edit("**Req db Cleared**" )
 
 
 @app.on_message(filters.command('purge_two') & filters.private & filters.user(ADMINS))
 async def purge_req_two(bot:pyrogram.client.Client, message:pyrogram.types.messages_and_media.message.Message):
-    r = await message.reply("`processing...`")
+    r = await app.send_message(message.from_user.id, "`processing...`")
     await db.delete_all_two()
     await r.edit("**Req db Cleared**" )
 

@@ -231,14 +231,14 @@ async def join_reqs(_, join_req: ChatJoinRequest):
 
 
 @app.on_message(filters.command('purge_one') & filters.private & filters.user(ADMINS))
-async def purge_req_one(bot, message):
+async def purge_req_one(bot:pyrogram.client.Client, message:pyrogram.types.messages_and_media.message.Message):
     r = await message.reply("`processing...`")
     await db.delete_all_one()
     await r.edit("**Req db Cleared**" )
 
 
 @app.on_message(filters.command('purge_two') & filters.private & filters.user(ADMINS))
-async def purge_req_two(bot, message):
+async def purge_req_two(bot:pyrogram.client.Client, message:pyrogram.types.messages_and_media.message.Message):
     r = await message.reply("`processing...`")
     await db.delete_all_two()
     await r.edit("**Req db Cleared**" )

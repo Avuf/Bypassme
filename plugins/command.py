@@ -123,7 +123,7 @@ async def join_reqs(_, join_req: ChatJoinRequest):
 
 @Client.on_message(filters.command("purge_one") & filters.user(ADMINS))
 async def purgeone(bot, message: Message):
-    r = await bot..send_message(message.from_user.id, "`processing...`")
+    r = await bot.send_message(message.from_user.id, "`processing...`")
     await db.delete_all_one()
     await r.edit("**Req db Cleared**" )
 

@@ -256,7 +256,7 @@ def loopthread(bot, message):
         if urls[0] in "https://olamovies" or urls[0] in "https://psa.pm/":
             msg = bot.send_message(message.chat.id, "🔎 __this might take some time...__", reply_to_message_id=message.id)
         else:
-            msg = bot..send_message(message.chat.id, "🔎 __bypassing... Please Wait 8-10 Seconds__", reply_to_message_id=message.id)
+            msg = bot.send_message(message.chat.id, "🔎 __bypassing... Please Wait 8-10 Seconds__", reply_to_message_id=message.id)
            
             
     link = ""

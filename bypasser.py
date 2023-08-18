@@ -1,3 +1,4 @@
+import os
 import re
 import requests
 import base64
@@ -21,14 +22,13 @@ def getenv(var): return environ.get(var) or DATA.get(var, None)
 ##########################################################
 # ENVs
 
-GDTot_Crypt = getenv("CRYPT")
-Laravel_Session = getenv("Laravel_Session")
-XSRF_TOKEN = getenv("XSRF_TOKEN")
-DCRYPT = getenv("DRIVEFIRE_CRYPT")
-KCRYPT = getenv("KOLOP_CRYPT")
-HCRYPT = getenv("HUBDRIVE_CRYPT")
-KATCRYPT = getenv("KATDRIVE_CRYPT")
-CF = getenv("CLOUDFLARE")
+GDTot_Crypt = os.environ.get("CRYPT","eTAzVVJxYzVzbjJBRGJWWnF0QXkxaFVZV1pNa0ZBYXdqR1dkSjNLSXFyWT0%3D")
+Laravel_Session = os.environ.get("Laravel_Session","eyJpdiI6IlFrSEc2bmFcL3hTbldQXC91c1wvMEorV2c9PSIsInZhbHVlIjoiWGdVXC9GU1FJWFdFUVl0SGZiNzJBWTZ6SkFXaHB5eWpUN3ZDM0h1aU1JVFoyV0Jpbk0rc1lJazhWUnVFa0JNZVUiLCJtYWMiOiJhMDg5ZTU1NjE3MmFiYWNjOTcwOWVkMzFmMjBlODQ5NWZiOTI3MDMwZjAzNTk3MDAyYjAxMGY4ZmU0ODk2MjlhIn0%3D")
+XSRF_TOKEN = os.environ.get("XSRF_TOKEN","eyJpdiI6IlwvTUhNZGZEU3dwdGVqZzZ4VzFQSTlBPT0iLCJ2YWx1ZSI6InhrSmNXS2pUOUVhZkNKYWZJOGJrTEwrcjBoYzl0Zk5CTytHK09nMU1QWFRwemlpdHdVNm5SQzlZRE9tQlNcLzUxIiwibWFjIjoiMjUzMzQzNjM2N2M0ZjA3NjQwNGY1ZDY2MTc5N2ViMWZlNjg1MTkwNzBjNWFhNjkwZjNkMDk5ZTQyNzgyMjFkMyJ9")
+DCRYPT = os.environ.get("DRIVEFIRE_CRYPT","RFFiMGNXQUY3N3Y1RGJ4MXAyM2VWSktZZnpyRDhEMFlXV2NoR1VxcytROD0%3D")
+KCRYPT = os.environ.get("KOLOP_CRYPT","V2wwSEVkL3NtR2V5aXBrU2hxT3NDaHV0MnpJekZ1dnlmZTdvL3FXQUtjcz0%3D")
+HCRYPT = os.environ.get("HUBDRIVE_CRYPT","ck4rL1lZVzRwRDJ6TFNPVVF3Lzg0VkpudWhldkJiamdhTUdhMmp3c3ZzTT0%3D")
+KATCRYPT = os.environ.get("KATDRIVE_CRYPT","V2wwSEVkL3NtR2V5aXBrU2hxT3NDaHV0MnpJekZ1dnlmZTdvL3FXQUtjcz0%3D")
 
 ############################################################
 # Lists

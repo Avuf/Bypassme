@@ -194,11 +194,10 @@ def handleIndex(ele,message,msg):
     except: pass
     for page in result: app.send_message(message.chat.id, page, reply_to_message_id=message.id, disable_web_page_preview=True)
    
-
 @app.on_message(filters.command('sites') & filters.incoming)
-async def send_sites(client: pyrogram.client.Client, message: Message):
-    await app.send_message(message.from_user.id, SITES_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]), reply_to_message_id=message.id)
-
+async def gesists(bot, message):
+    rju = await message.reply('...')
+    await rju.edit(SITES_TEXT, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⚡Request⚡", url='https://t.me/Legend_Shivam_7Bot')]]))
 
 @app.on_message([filters.document, filters.photo, filters.video])
 async def docfile(client: pyrogram.client.Client, message: pyrogram.types.messages_and_media.message.Message):
